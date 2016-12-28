@@ -1,0 +1,78 @@
+#include <vector>
+
+#include "matrix.h"
+
+using namespace std;
+
+//std::vector<std::vector<double>> matrix;
+//public:
+Matrix::Matrix(int n):
+  matrix{vector<vector<double>> {n,vector<double> {n}}},
+{}
+
+  
+void transform(Matrix &) const;
+
+double get(int ,int ) const;
+int row() const;
+int col() const;
+std::vector<double> row(int ) const;
+std::vector<double> col(int ) const;
+void addRow(vector<double> &);
+void addCol(vector<double> &);
+void set(int i, int j, T &t);
+
+Matrix Matrix::operator +(const Matrix &m){
+  if(m.size()==matrix.size()){
+    Matrix r=m;
+    int len = m.size();
+    for(int i = 0; i < len; i++){
+      for(int j = 0; j < len; j++){
+	r.set(i,j,matrix[i][j]+m.get(i,j));
+      }
+    }
+    return r;
+  }else{
+    Matrix r{0};
+    return r;
+  }
+}
+
+void Matrix::operator +=(const Matrix &m){
+  if(m.size()==matrix.size()){
+    int len = matrix.size();
+    for(int i = 0; i < len; i++){
+      for(int j = 0; j< len; j++){
+	matrix[i][j]+=m.get(i,j);
+      }
+    }
+  }
+}
+
+bool Matrix::operator ==(const Matrix &m){
+  if(m.size()==matrix.size()){
+    for(int i = matrix.size()-1;i>=0;i--){
+      for(int j = matrix.size()-1;j>=0;j--){
+	if(matrix[i][j]!=m.get(i,j)){
+	  return false;
+	}
+      }
+    }
+  }else{
+    return false;
+  }
+  return true;
+}
+
+Matrix Matrix::operator *(const double c){
+  int len = matrix.size();
+  Matrix m{len};
+  for(int i=0;i<len;i++){
+    for(int j=0;j<len;j++){
+      m.set(i,j,matrix[i][j]*c);
+    }
+  }
+  return m;
+}
+
+Matrix Matrix::operator *(const Matrix &);
