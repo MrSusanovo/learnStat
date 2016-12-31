@@ -1,7 +1,7 @@
 CXX = g++-5
 CXXFLAGS = -std=c++14 -Wall -MMD
 EXEC = demo
-OBJECTS = markov.o  main.o
+OBJECTS = hmm.o  main.o
 DEPENDS = ${OBJECTS:.o=.d}
 
 ${EXEC}: ${OBJECTS}
