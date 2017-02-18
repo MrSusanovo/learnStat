@@ -1,0 +1,40 @@
+HMM Notes:
+
+Define pos2pos mult as X
+
+Initial State Vector: Pi
+
+State Vector at Time t: Pi_t
+
+Transmission Matrix: A
+
+Emission Matrix: B
+
+Whole model: lambda
+
+Pi_t = :
+	when no observation given:
+		Pi cross A
+	when observation given:
+		A^T cross Alpha_(t-1)
+		
+Alpha_t(i) = P(O,i| lambda): # prob of state is i and observation is O
+	P1(i) = Pi[i] * B[i, O1] # noted as Alpha1[i]
+	Alpha1 = [Pi[i] * B[i,O1]] = Pi X B[,O1]
+	P2(i) = Alpha1 dot A[,i] * B[i,O2]
+	Alpha2 = ( A^T cross Alpha1 ) X B[,O2]
+	Alphan = (A^T cross Alpha(n-1) ) X B[,On]
+
+Beta_t(i)
+	
+P(O|lambda):
+	P1 = Pi dot B[O_1]
+	P2 = Pi dot B[O_1] * (Pi cross A) dot B[O_2]
+	P_t = P_1 * ... * (P_(t-1) cross A) dot B[O_n]
+
+Hidden Sequence given Observation and Lambda:
+	S1 = max(Pi X B[,O1])
+	S2 = max(A^T cross Alpha(n-1) ) X B[,O2])
+	   = max(Pi_2 X B[,O2])
+	Sn = max(Pi_n X B[,O3])
+
