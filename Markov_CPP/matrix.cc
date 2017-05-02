@@ -8,17 +8,21 @@ const int size;
 
 Vector::Vector(int size): size{size}
 {
-  v = new int [size];
+  v = new double [size];
   copy = new int;
   *copy = 1;
 }
 
-Vector::Vector(int *vec,int size):
+Vector::Vector(double *vec,int size, bool shallow=false):
   size{size}
 {
-  v = new int[size];
-  for(int i=0;i<size;i++){
-    v[i]=vec[i];
+  if(shallow){
+    v = vec;
+  }else{
+    v = new double[size];
+    for(int i=0;i<size;i++){
+      v[i]=vec[i];
+    }
   }
   copy = new int;
   *copy = 1;
@@ -49,13 +53,13 @@ Vector::~Vector(){
   }
 }
 
-void Vector::setVal(int index, int num){
+void Vector::setVal(int index, double num){
   if(index < size && index > 0){
     v[index] = num;
   }
 }
 
-int Vector::operator[](const int i) const{
+double Vector::operator[](const int i) const{
   return v[i];
 }
 
@@ -73,7 +77,7 @@ Vector Vector::operator *(Vector &vec){
   }
 }
 
-int Vector::dot(Vector & vec){
+double Vector::dot(Vector & vec){
   if(vec.len() == size){
     int result = 0;
     for(int i=0; i<size; i++){
@@ -113,23 +117,23 @@ Matrix::Matrix(int rows, int cols):
   row{rows},
   col{cols}
 {
-  matrix = new int *[row];
+  matrix = new double *[row];
   copy = new int;
   *copy = 1;
   for(int i=0; i<rows; i++){
-    matrix[i] = new int[col];
+    matrix[i] = new double[col];
   }
 }
 
-Matrix::Matrix(int **m,int r,int c):
+Matrix::Matrix(double **m,int r,int c):
   row{r},
   col{c}
 {
-  matrix = new int *[row];
+  matrix = new double *[row];
   copy = new int;
   *copy = 1;
   for(int i=0; i<row; i++){
-    matrix[i] = new int[col];
+    matrix[i] = new double[col];
     for(int j = 0; j<col; j++){
       matrix[i][j] = m[i][j];
     }
@@ -140,9 +144,9 @@ Matrix::Matrix(Vector* m, int row, int col):
   row{row},
   col{col}
 {
-  matrix = new int *[row];
+  matrix = new double *[row];
   for(int i=0; i<row; i++){
-    matrix[i] = new int[col];
+    matrix[i] = new double[col];
     for(int j=0; j<col; j++){
       matrix[i][j] = m[i][j];
     }
@@ -165,8 +169,8 @@ Matrix::Matrix(Matrix &&temp):
   row{temp.row},
   col{temp.col},
   copy{temp.copy},
-  rname{mat.rname},
-  cname{mat.cname}
+  rname{temp.rname},
+  cname{temp.cname}
 {
   *copy +=1;
 }
@@ -193,27 +197,29 @@ Matrix Matrix::trans() const{
   return m;
 }
 
-void Matrix::setVal(int r, int c, int v){
+void Matrix::setVal(int r, int c, double v){
   if(r<row && c < col){
-    matrix[r].setVal(c,v);
+    matrix[r][c]=v;
   }
 }
 
-void Matrix::setVal(string &r, string &c, int v){
-  if(rname.begin() && cname.begin()){
-    matrix[rname[r]].setVal(cname[c],v);
+void Matrix::setVal(string &r, string &c, double v){
+  if(rname.size() && cname.size()){
+    matrix[rname[r]][cname[c]]=v;
   }
 }
 Vector &Matrix::operator[](const int i){
   if(i<row){
-    return matrix[i];
+    Vector result(matrix[i],col, true);
+    return result;
   }
 }
 
 Vector &Matrix::operator[](const string & key){
-  if(rname.begin()){
+  if(rname.size()){
     int i = rname[key];
-    return matrix[i];
+    Vector result(matrix[i], col, true);
+    return result;
   }
 }
   
@@ -225,41 +231,56 @@ int Matrix::getCol() const{
   return col;
 }
 
-void Matrix::setName(vector<string> &v){
+void Matrix::setName(vector<string> &v, bool isRow=false){
   int len = v.size();
-  if(len==row){
+  if(isRow){
     for(int i=0; i < len; i++){
       rname[v[i]] = i;
     }
-  }else if(len==col){
+  }else{
     for(int i=0; i < len; i++){
       cname[v[i]] = i;
     }
   }
 }
 
-void Matrix::setName(string[] &a, int s){
-  if(s==row){
+/*
+void Matrix::setName(string[] a, int s, bool isRow=false){
+  if(isRow){
     for(int i = 0; i < s; i++){
       rname[a[i]] = i;
     }
-  }else if(s==col){
+  }else{
     for(int i=0; i < s ; i++){
       cname[a[i]] = i;
     }
   }
 }
+*/
 
-int Matrix::getRC(string &r, string &c)const{
-  if(rname.begin() && cname.begin()){
-    return matrix[rname[r]][cname[c]];
+void Matrix::setName(map<string,int> &m, bool isRow=false){
+  if(isRow){
+    rname=m;
+  }else{
+    cname=m;
+  }
+}
+
+double Matrix::getRC(string &r, string &c)const{
+  if(rname.size() && cname.size()){
+    int rowNum = this->rname[r];
+    int colNum = this->cname[c];
+    return matrix[rowNum][colNum];
   }
 }
 
 Matrix Matrix::getCopy() const{
   Matrix m(row,col);
+  double *rowPointer;
   for(int i = 0; i<row; i++){
-    m[i] = matrix[i].getCopy();
+    for(int j=0;j<col;j++){
+      m.setVal(i,j,matrix[i][j]);
+    }
   }
   return m;
 }
@@ -272,8 +293,8 @@ Matrix Matrix::operator *(Matrix &m){
 	mat.setVal(i,j,matrix[i][j] * m[i][j]);
       }
     }
-    mat.setRname(rname);
-    mat.setRname(cname);
+    mat.setName(rname, true);
+    mat.setName(cname, false);
     return mat;
   }
 }
