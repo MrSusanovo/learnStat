@@ -268,7 +268,7 @@ void Matrix::setName(map<string,int> &m, bool isRow=false){
 
 double Matrix::getRC(string &r, string &c)const{
   if(rname.size() && cname.size()){
-    int rowNum = this->rname[r];
+    int rowNum = rname[r];
     int colNum = this->cname[c];
     return matrix[rowNum][colNum];
   }
