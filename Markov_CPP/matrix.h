@@ -42,8 +42,8 @@ class Matrix{
   Matrix(Matrix &&);// shallow
   ~Matrix();// detor
   Matrix trans() const;// return a deep copy transpose matrix
-  Vector &operator[](const int);// get vector by index
-  Vector &operator[](const std::string &);//get vector by string
+  double *operator[](const int);// get vector by index
+  double *operator[](const std::string &);//get vector by string
   Matrix operator *(Matrix &); // get the pos to pos product matrix deep copy
   void setVal(int, int, double);// set value by index
   void setVal(std::string &, std::string &, double);// set value by string

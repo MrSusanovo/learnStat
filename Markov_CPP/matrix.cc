@@ -17,10 +17,13 @@ Vector::Vector(double *vec,int size, bool shallow=false):
   size{size}
 {
   if(shallow){
+    //cerr<<"Shallow copy"<<endl;
     v = vec;
   }else{
+    //cerr<<"Vector ctor: vec size shallow"<<endl;
     v = new double[size];
     for(int i=0;i<size;i++){
+      //cerr<<"Vector ctor: vec["<<i<<"] = "<<vec[i]<<endl;
       v[i]=vec[i];
     }
   }
@@ -33,19 +36,22 @@ Vector::Vector(const Vector &vec):
   copy{vec.copy},
   size{vec.size}
 {
+  //cerr<<"copy ctor"<<endl;
   *copy+=1;
 }
-
+  
 
 Vector::Vector(Vector &&temp):
   v{temp.v},
   copy{temp.copy},
   size{temp.size}
 {
+  //cerr<<"temp copy ctor"<<endl;
   *copy+=1;
 }
 
 Vector::~Vector(){
+  //cerr<<"vector dtor"<<endl;
   *copy -= 1;
   if(copy == 0){
     delete[] v;
@@ -60,6 +66,7 @@ void Vector::setVal(int index, double num){
 }
 
 double Vector::operator[](const int i) const{
+  //cerr<<"vector [] correct"<<endl;
   return v[i];
 }
 
@@ -176,6 +183,7 @@ Matrix::Matrix(Matrix &&temp):
 }
 
 Matrix::~Matrix(){
+  //cerr<<"marix dtor"<<endl;
   *copy -=1;
   if(*copy < 0){
     for(int i=0; i< row; i++){
@@ -199,6 +207,7 @@ Matrix Matrix::trans() const{
 
 void Matrix::setVal(int r, int c, double v){
   if(r<row && c < col){
+    //cerr<<"set "<<r<<" "<<c<<": "<<v<<endl;
     matrix[r][c]=v;
   }
 }
@@ -208,18 +217,17 @@ void Matrix::setVal(string &r, string &c, double v){
     matrix[rname[r]][cname[c]]=v;
   }
 }
-Vector &Matrix::operator[](const int i){
+double * Matrix::operator[](const int i){
   if(i<row){
-    Vector result(matrix[i],col, true);
-    return result;
+    //cerr<<"matrix []: col "<<col<<endl;
+    return matrix[i];
   }
 }
 
-Vector &Matrix::operator[](const string & key){
+double * Matrix::operator[](const string & key){
   if(rname.size()){
     int i = rname[key];
-    Vector result(matrix[i], col, true);
-    return result;
+    return matrix[i];
   }
 }
   
@@ -266,11 +274,11 @@ void Matrix::setName(map<string,int> &m, bool isRow=false){
   }
 }
 
-double Matrix::getRC(string &r, string &c)const{
-  if(rname.size() && cname.size()){
-    int rowNum = rname[r];
-    int colNum = this->cname[c];
-    return matrix[rowNum][colNum];
+double Matrix::getRC(string &r, string &c) const{
+  auto RIter = rname.find(r);
+  auto CIter = cname.find(c);
+  if(CIter!=cname.end() && RIter!=rname.end()){
+    return matrix[RIter->second][CIter->second];
   }
 }
 
